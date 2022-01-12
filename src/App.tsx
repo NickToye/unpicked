@@ -1,6 +1,6 @@
 import React, { FC, useState } from 'react';
 import { v4 as uuid } from 'uuid';
-import { Key, Chord } from '@tonaljs/tonal';
+import { Key } from '@tonaljs/tonal';
 import './App.css';
 
 // import Button from './components/Button';
@@ -20,9 +20,9 @@ interface Keys {
     scale: [];
 }
 
-const fizz = Chord.get('C');
+// const fizz = Chord.get('C');
 
-console.log(fizz);
+// console.log(fizz);
 
 const getChords = (e: string, x: string): any => {
     switch (x) {
