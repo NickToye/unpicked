@@ -36,3 +36,27 @@
     transform: rotate(360deg);
   }
 }
+
+button {
+  pointer-events: all;
+}
+
+button:hover {
+  cursor: pointer;
+}
+
+.keys-wrapper {
+  display: flex;
+  justify-content: space-between;
+  padding: 24px;
+}
+
+.keys-wrapper > .key {
+  cursor: pointer;
+  padding: 12px;
+  border: 1px solid black;
+}
+
+.key:hover {
+  background: red;
+}
