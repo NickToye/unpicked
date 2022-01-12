@@ -39,6 +39,7 @@
                 "allowExpressions": true
             }
         ],
+        "@typescript-eslint/explicit-module-boundary-types": ["off"],
         "max-len": ["warn", { "code": 120 }],
         "react-hooks/rules-of-hooks": "error",
         "react-hooks/exhaustive-deps": "warn",

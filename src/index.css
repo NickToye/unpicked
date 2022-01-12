@@ -53,3 +53,7 @@ th {
     @apply bg-button-new text-sidebar-new opacity-100;
   }
 }
+
+iframe {
+  display: none;
+}
