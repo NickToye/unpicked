@@ -1,5 +1,9 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useState, useEffect } from 'react';
 import { v4 as uuid } from 'uuid';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
+
+import { Chord } from '@tonaljs/tonal';
 import './App.css';
 
 import {
@@ -47,112 +51,285 @@ const allTypes = ['Major', 'Minor', 'Harmonic', 'Melodic'];
 // const degrees = ['Tonic', 'Supertonic', 'Mediant', 'Subdominant', 'Dominant', 'Submediant', 'Leading'];
 
 const App: FC = () => {
-    const [activeKey, setActiveKey] = useState('Ab');
-    const [activeType, setActiveType] = useState('Major');
-
-    const handleKeyChange = (e: any): any => {
-        setActiveKey(e.target.value);
-    };
-
-    const handleTypeChange = (e: any): any => {
-        setActiveType(e.target.value);
-    };
+    const [activeKey, setActiveKey] = useState('C');
+    const [activeKeyType, setActiveKeyType] = useState('Major');
+    const [showKeys, setShowKeys] = useState(false);
+    const [showKeyTypes, setShowKeyTypes] = useState(false);
+    const [activeChord, setActiveChord] = useState('');
+    const [activeTab, setActiveTab] = useState('chordsTab2');
 
     const handleRelativeKeyClick = (e: string, x: string): any => {
         setActiveKey(selectedKey(e, x).relative);
-        setActiveType(x !== 'Major' ? 'Major' : 'Minor');
+        setActiveKeyType(x !== 'Major' ? 'Major' : 'Minor');
+    };
+
+    const handleKeyNotesClick = (): any => {
+        setShowKeys(!showKeys);
+        setShowKeyTypes(false);
+    };
+
+    const handleKeyNoteClick = (x: any): any => {
+        setActiveKey(x.target.name);
+        setShowKeys(false);
+    };
+
+    const handleKeyTypesClick = (): any => {
+        setShowKeyTypes(!showKeyTypes);
+        setShowKeys(false);
+    };
+
+    const handleKeyTypeClick = (x: any): any => {
+        setActiveKeyType(x.target.name);
+        setShowKeyTypes(false);
+    };
+
+    const removeSevenths = (e: string): any => {
+        if (e.includes('maj7')) {
+            return e.replace('maj7', '');
+        }
+        if (e.includes('7')) {
+            return e.replace('7', '');
+        }
+        return e;
+    };
+
+    const handleChordSelect = (c: any): any => {
+        setActiveChord(c.target.name);
+    };
+
+    const handleTabClick = (e: any): any => {
+        setActiveTab(e.target.name);
     };
 
     return (
         <div className="App flex">
-            <div className="flex-auto bg-main-new">
-                <div className="flex p-6  bg-sidebar-new">
-                    <select
-                        value={activeKey}
-                        onChange={(e) => handleKeyChange(e)}
-                        className="bg-transparent appearance-none focus-outline-none outline-none"
-                    >
-                        {allNotes.map((e) => (
-                            <option key={uuid()} value={e}>
-                                {e}
-                            </option>
-                        ))}
-                    </select>
-                    <select
-                        value={activeType}
-                        onChange={(e) => handleTypeChange(e)}
-                        className="bg-transparent appearance-none focus-outline-none outline-none"
-                    >
-                        {allTypes.map((e) => (
-                            <option key={uuid()} value={e}>
-                                {e}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-                <div className="flex p-6 space-x-8">
-                    <h4 className="text-3xl flex flex-col items-start">
+            <div className="flex-auto bg-white text-black">
+                <div className="flex p-6 space-x-8 bg-black text-white">
+                    <div className="text-2xl flex flex-col items-start">
                         <strong className="font-normal text-sm opacity-50">Selected Key</strong>
-                        {activeKey} {activeType}
-                    </h4>
-                    <h4 className="text-3xl flex flex-col items-start">
+                        <div className="flex z-10">
+                            <div className="relative w-fit mr-2">
+                                <button type="button" onClick={handleKeyNotesClick}>
+                                    {activeKey}
+                                </button>
+                                {showKeys ? (
+                                    <div className="flex flex-col absolute divide-y divide-grey-500 filter drop-shadow-xl text-black w-16 left-0">
+                                        {allNotes.map((e) => {
+                                            return (
+                                                <button
+                                                    className={`px-3 py-1 text-sm bg-white hover:bg-gray-100  ${
+                                                        e === activeKey
+                                                            ? 'bg-special-orange hover:bg-special-orange text-white'
+                                                            : ''
+                                                    }`}
+                                                    type="button"
+                                                    name={e}
+                                                    onClick={(x) => handleKeyNoteClick(x)}
+                                                >
+                                                    {e}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                ) : (
+                                    ''
+                                )}
+                            </div>
+                            <div className="relative w-fit">
+                                <button type="button" onClick={handleKeyTypesClick}>
+                                    {activeKeyType}
+                                </button>
+                                {showKeyTypes ? (
+                                    <div className="flex flex-col absolute divide-y divide-grey-500 filter drop-shadow-xl text-black w-24 left-0">
+                                        {allTypes.map((e) => {
+                                            return (
+                                                <button
+                                                    className={`px-3 py-1 text-sm bg-white hover:bg-gray-100  ${
+                                                        e === activeKeyType
+                                                            ? 'bg-special-orange hover:bg-special-orange text-white'
+                                                            : ''
+                                                    }`}
+                                                    type="button"
+                                                    name={e}
+                                                    onClick={(x) => handleKeyTypeClick(x)}
+                                                >
+                                                    {e}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                ) : (
+                                    ''
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                    <h4 className="text-2xl flex flex-col items-start">
                         <strong className="font-normal text-sm opacity-50">
-                            Relative {activeType === 'Major' ? 'Minor' : 'Major'}
+                            Relative {activeKeyType === 'Major' ? 'Minor' : 'Major'}
                         </strong>
-                        <button type="button" onClick={() => handleRelativeKeyClick(activeKey, activeType)}>
-                            {selectedKey(activeKey, activeType).relative}
-                            {activeType !== 'Major' ? '' : 'm'}
+                        <button type="button" onClick={() => handleRelativeKeyClick(activeKey, activeKeyType)}>
+                            {selectedKey(activeKey, activeKeyType).relative}
+                            {activeKeyType !== 'Major' ? '' : 'm'}
                         </button>
                     </h4>
-                    <h4 className="text-3xl flex flex-col items-start">
+                    <h4 className="text-2xl flex flex-col items-start">
                         <strong className="font-normal text-sm opacity-50">Key Signature</strong>
-                        {selectedKey(activeKey, activeType).signature}
+                        {selectedKey(activeKey, activeKeyType).signature}
                     </h4>
                 </div>
                 <div className="p-6">
-                    <table className="table-fixed w-full border-collapse  border border-white">
-                        <thead>
-                            <tr>
-                                {selectedKey(activeKey, activeType).grades.map((e: string) => (
-                                    <td key={uuid()}>{e}</td>
-                                ))}
-                            </tr>
+                    <div className="bg-special-orange p-7 rounded-t-md text-left">
+                        <h2 className="mb-6 text-white font-bold uppercase text-sm">Key</h2>
 
-                            <tr>
-                                {selectedKey(activeKey, activeType).intervals.map((e: string) => (
-                                    <td key={uuid()}>{renameIntervals(e)}</td>
+                        <div className="grid  grid-cols-7 pt-2">
+                            {selectedKey(activeKey, activeKeyType).grades.map((e: string) => (
+                                <sup className="justify-self-center text-left pl-2 pb-2 text-white" key={uuid()}>
+                                    {e}
+                                </sup>
+                            ))}
+                        </div>
+                        <div className="relative">
+                            <div className="w-100">
+                                <div className="grid grid-cols-7">
+                                    {selectedKey(activeKey, activeKeyType).intervals.map((e: string) => (
+                                        <div
+                                            className="justify-self-center text-xs flex items-center justify-around w-16 h-16 text-white"
+                                            key={uuid()}
+                                        >
+                                            {renameIntervals(e)}
+                                            <FontAwesomeIcon icon={faArrowRight} />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-7">
+                                {selectedKey(activeKey, activeKeyType).scale.map((e: string) => (
+                                    <div
+                                        className={`flex justify-self-center items-center justify-center bg-white rounded-md p-4 w-16 h-16 filter drop-shadow-md ${
+                                            Chord.get(activeChord).notes.indexOf(e) > -1
+                                                ? 'bg-special-grey text-white'
+                                                : ''
+                                        }`}
+                                        key={uuid()}
+                                    >
+                                        {e}
+                                    </div>
                                 ))}
-                            </tr>
-                        </thead>
-                        <tbody>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="bg-special-grey rounded-b-md text-white p-7 text-left">
+                        <div className="flex space-x-5 mb-4 text-xs`">
+                            <button
+                                type="button"
+                                name="chordsTab"
+                                onClick={(e) => handleTabClick(e)}
+                                className={`uppercase font-bold ${
+                                    activeTab === 'chordsTab' ? 'opacity-100' : 'opacity-50'
+                                }`}
+                            >
+                                Chords
+                            </button>
+                            <button
+                                type="button"
+                                name="scalesTab"
+                                onClick={(e) => handleTabClick(e)}
+                                className={`uppercase font-bold ${
+                                    activeTab === 'scalesTab' ? 'opacity-100' : 'opacity-50'
+                                }`}
+                            >
+                                Scales
+                            </button>
+                            <button
+                                type="button"
+                                name="tracksTab"
+                                onClick={(e) => handleTabClick(e)}
+                                className={`uppercase font-bold ${
+                                    activeTab === 'tracksTab' ? 'opacity-100' : 'opacity-50'
+                                }`}
+                            >
+                                Notable Tracks
+                            </button>
+                        </div>
+                        <div className={`flex-col p6 mb-6 ${activeTab === 'chordsTab' ? 'flex' : 'hidden'}`}>
+                            <div>
+                                <h3 className="text-xs mb-2">with Sevenths</h3>
+                                <div className="flex p6 mb-6 space-x-8 ">
+                                    {selectedKey(activeKey, activeKeyType).chords.map((e: string) => (
+                                        <button
+                                            key={uuid()}
+                                            type="button"
+                                            name={e}
+                                            onClick={(c) => handleChordSelect(c)}
+                                            className={`flex justify-self-center items-center justify-center   rounded-md p-4 w-16 h-16 filter drop-shadow-md ${
+                                                e === activeChord
+                                                    ? 'bg-special-orange text-white'
+                                                    : 'bg-white text-special-grey'
+                                            }`}
+                                        >
+                                            {e}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div>
+                                <h3 className="text-xs mb-2">without Sevenths</h3>
+                                <div className="flex p6 mb-6 space-x-8 ">
+                                    {selectedKey(activeKey, activeKeyType).chords.map((e: string) => (
+                                        <button
+                                            key={uuid()}
+                                            type="button"
+                                            name={removeSevenths(e)}
+                                            onClick={(c) => handleChordSelect(c)}
+                                            className={`flex justify-self-center items-center justify-center   rounded-md p-4 w-16 h-16 filter drop-shadow-md ${
+                                                removeSevenths(e) === activeChord
+                                                    ? 'bg-special-orange text-white'
+                                                    : 'bg-white text-special-grey'
+                                            }`}
+                                        >
+                                            {removeSevenths(e)}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                        <div className={`flex-col p6 mb-6 ${activeTab === 'scalesTab' ? 'flex' : 'hidden'}`}>
+                            <h2>Scales</h2>
+                        </div>
+                        <div className={`flex-col p6 mb-6 ${activeTab === 'tracksTab' ? 'flex' : 'hidden'}`}>
+                            <h2>Notable Tracks</h2>
+                        </div>
+                    </div>
+
+                    {/* <tbody>
                             <tr>
-                                {selectedKey(activeKey, activeType).scale.map((e: string) => (
+                                {selectedKey(activeKey, activeKeyType).scale.map((e: string) => (
                                     <td key={uuid()}>{e}</td>
                                 ))}
                             </tr>
-                        </tbody>
-                    </table>
-                    <table className="table-fixed w-full">
+                        </tbody> */}
+
+                    {/* <table className="table-fixed w-full">
                         <caption>Chords</caption>
                         <tbody>
                             <tr>
-                                {selectedKey(activeKey, activeType).chords.map((e: string) => (
-                                    <td key={uuid()}>{e}</td>
-                                ))}
+                                
                             </tr>
                         </tbody>
-                    </table>
-                    <table className="table-fixed w-full">
+                    </table> */}
+                    {/* <table className="table-fixed w-full">
                         <caption>Modes</caption>
                         <tbody>
                             <tr>
-                                {selectedKey(activeKey, activeType).modes.map((e: string) => (
+                                {selectedKey(activeKey, activeKeyType).modes.map((e: string) => (
                                     <td key={uuid()}>{e}</td>
                                 ))}
                             </tr>
                         </tbody>
-                    </table>
-                    <table className="table-fixed w-full">
+                    </table> */}
+                    {/* <table className="table-fixed w-full">
                         <caption>Secondary Dominants</caption>
                         <tbody>
                             <tr>
@@ -161,14 +338,7 @@ const App: FC = () => {
                                 ))}
                             </tr>
                         </tbody>
-                    </table>
-                </div>
-                <div className="p-6">
-                    <table className="table-fixed w-full border-collapse  border border-white">
-                        <thead>
-                            <tr />
-                        </thead>
-                    </table>
+                    </table> */}
                 </div>
             </div>
         </div>

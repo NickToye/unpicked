@@ -18,16 +18,17 @@ table {
 }
 
 caption {
-  @apply bg-cobalt-blue;
+  @apply text-cobalt-blue;
   width: 100%;
 }
 
 thead {
-  @apply bg-cobalt-darkest-blue;
+  @apply text-cobalt-darkest-blue;
 }
 
 tbody {
-  @apply bg-cobalt-dark-blue;
+  @apply bg-gray-200;
+  @apply text-black;
 }
 
 td {

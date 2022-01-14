@@ -15,6 +15,7 @@ module.exports = {
             blue: colors.lightBlue,
             green: colors.green,
             cyan: colors.cyan,
+            slate: colors.slate,
         },
         extend: {
             colors: {
@@ -28,6 +29,8 @@ module.exports = {
                 'main-new': '#004266',
                 'button-new': '#d8cabf',
                 'special-new': '#3a414f',
+                'special-orange': '#f4624a',
+                'special-grey': '#0A0B0D',
             },
         },
     },
