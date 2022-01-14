@@ -1,4 +1,4 @@
-import React, { FC, useState, useEffect } from 'react';
+import React, { FC, useState } from 'react';
 import { v4 as uuid } from 'uuid';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
@@ -246,7 +246,7 @@ const App: FC = () => {
                                 name="tracksTab"
                                 onClick={(e) => handleTabClick(e)}
                                 className={`uppercase font-bold ${
-                                    activeTab === 'tracksTab' ? 'opacity-100' : 'opacity-50'
+                                    activeTab === 'tracksTab`' ? 'opacity-100' : 'opacity-50'
                                 }`}
                             >
                                 Notable Tracks
