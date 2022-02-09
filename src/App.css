@@ -60,3 +60,48 @@ button:hover {
 .key:hover {
   background: red;
 }
+
+.guitar-chart button {
+  font-size: 12px;
+    margin-bottom: 10px;
+    background: black;
+    padding: 6px;
+    width: 100%;
+    border-radius: 6px;
+}
+
+.guitar-chart circle {
+  fill: #f4624a !important;
+}
+
+.dot-text {
+  fill: white;
+}
+
+.dot-circle {
+  filter: drop-shadow( 2px 2px 1px rgba(0, 0, 0, .3));
+}
+
+.fretboard {
+  background: #f5aa59;
+  border-radius: 6px;
+  margin: 24px 0 48px;
+}
+
+.dot-circle {
+  opacity: .2;
+}
+
+.dot-in-box > .dot-circle {
+  /* fill: #bada55; */
+  opacity: 1;
+}
+
+.dot-text {
+  opacity: .2;
+}
+
+.dot-in-box > .dot-text {
+  opacity: 1;
+}
+
