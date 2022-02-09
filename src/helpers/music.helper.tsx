@@ -119,3 +119,16 @@ export function getScale(e: string, x: string): any {
     }
     return x;
 }
+
+export const removeSevenths = (e: string): any => {
+    if (e.includes('maj7')) {
+        return e.replace('maj7', '');
+    }
+    if (e.includes('m7b')) {
+        return e;
+    }
+    if (e.includes('7')) {
+        return e.replace('7', '');
+    }
+    return e;
+};

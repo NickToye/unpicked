@@ -1,12 +1,17 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useState, useEffect } from 'react';
 import { v4 as uuid } from 'uuid';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
 
 import { Chord } from '@tonaljs/tonal';
-import './App.css';
-
+import ChordChart from './components/ChordChart';
+import ChordProgressions from './components/ChordProgressions';
+import PrimaryChords from './components/PrimaryChords';
+import FretboardContainer from './components/FretboardContainer';
+import { SecondaryDominants, SecondaryDominantsGrade } from './components/SecondaryDominants';
+import { Modes } from './components/Scales';
 import {
+    removeSevenths,
     getChords,
     getModes,
     getGrades,
@@ -16,6 +21,8 @@ import {
     getIntervals,
     getScale,
 } from './helpers/music.helper';
+import './App.css';
+
 import renameIntervals from './helpers/renameIntervals.helper';
 
 interface Keys {
@@ -48,15 +55,16 @@ function selectedKey(e: Keys['key'], x: Keys['type']): Keys {
 
 const allNotes = ['Ab', 'A', 'Bb', 'B', 'C', 'Db', 'D', 'Eb', 'E', 'F', 'F#', 'G'];
 const allTypes = ['Major', 'Minor', 'Harmonic', 'Melodic'];
-// const degrees = ['Tonic', 'Supertonic', 'Mediant', 'Subdominant', 'Dominant', 'Submediant', 'Leading'];
 
 const App: FC = () => {
     const [activeKey, setActiveKey] = useState('C');
     const [activeKeyType, setActiveKeyType] = useState('Major');
     const [showKeys, setShowKeys] = useState(false);
     const [showKeyTypes, setShowKeyTypes] = useState(false);
-    const [activeChord, setActiveChord] = useState('');
-    const [activeTab, setActiveTab] = useState('chordsTab2');
+    const [activeChord, setActiveChord] = useState(removeSevenths(getChords(activeKey, activeKeyType)[0]));
+    const [activeTab, setActiveTab] = useState('scalesTab');
+    const [chordsType, setChordsType] = useState('standard');
+    const [activeMode, setActiveMode] = useState('C major');
 
     const handleRelativeKeyClick = (e: string, x: string): any => {
         setActiveKey(selectedKey(e, x).relative);
@@ -73,6 +81,10 @@ const App: FC = () => {
         setShowKeys(false);
     };
 
+    useEffect(() => {
+        setActiveChord(removeSevenths(getChords(activeKey, activeKeyType)[0]));
+    }, [activeKey, activeKeyType]);
+
     const handleKeyTypesClick = (): any => {
         setShowKeyTypes(!showKeyTypes);
         setShowKeys(false);
@@ -83,28 +95,26 @@ const App: FC = () => {
         setShowKeyTypes(false);
     };
 
-    const removeSevenths = (e: string): any => {
-        if (e.includes('maj7')) {
-            return e.replace('maj7', '');
-        }
-        if (e.includes('7')) {
-            return e.replace('7', '');
-        }
-        return e;
-    };
-
     const handleChordSelect = (c: any): any => {
         setActiveChord(c.target.name);
+    };
+
+    const handleModeSelect = (c: any): any => {
+        setActiveMode(c.target.name);
     };
 
     const handleTabClick = (e: any): any => {
         setActiveTab(e.target.name);
     };
 
+    const handleChordsTypeClick = (e: any): any => {
+        setChordsType(e.target.name);
+    };
+
     return (
         <div className="App flex">
             <div className="flex-auto bg-white text-black">
-                <div className="flex p-6 space-x-8 bg-black text-white">
+                <div className="flex p-6 space-x-8 bg-black text-white sticky z-10 top-0 w-full">
                     <div className="text-2xl flex flex-col items-start">
                         <strong className="font-normal text-sm opacity-50">Selected Key</strong>
                         <div className="flex z-10">
@@ -220,7 +230,7 @@ const App: FC = () => {
                         </div>
                     </div>
                     <div className="bg-special-grey rounded-b-md text-white p-7 text-left">
-                        <div className="flex space-x-5 mb-4 text-xs`">
+                        <div className="flex space-x-5 mb-9 text-xs`">
                             <button
                                 type="button"
                                 name="chordsTab"
@@ -254,91 +264,80 @@ const App: FC = () => {
                         </div>
                         <div className={`flex-col p6 mb-6 ${activeTab === 'chordsTab' ? 'flex' : 'hidden'}`}>
                             <div>
-                                <h3 className="text-xs mb-2">with Sevenths</h3>
                                 <div className="flex p6 mb-6 space-x-8 ">
-                                    {selectedKey(activeKey, activeKeyType).chords.map((e: string) => (
+                                    <div className="text-xs cursor-pointer w-36">
                                         <button
-                                            key={uuid()}
                                             type="button"
-                                            name={e}
-                                            onClick={(c) => handleChordSelect(c)}
-                                            className={`flex justify-self-center items-center justify-center   rounded-md p-4 w-16 h-16 filter drop-shadow-md ${
-                                                e === activeChord
-                                                    ? 'bg-special-orange text-white'
-                                                    : 'bg-white text-special-grey'
+                                            name="standard"
+                                            onClick={(e) => handleChordsTypeClick(e)}
+                                            className={`mr-1 ${
+                                                chordsType === 'standard' ? 'opacity-100' : 'opacity-50'
                                             }`}
                                         >
-                                            {e}
+                                            Standard
                                         </button>
-                                    ))}
+                                        /
+                                        <button
+                                            type="button"
+                                            name="sevenths"
+                                            onClick={(e) => handleChordsTypeClick(e)}
+                                            className={`ml-1 ${
+                                                chordsType === 'sevenths' ? 'opacity-100' : 'opacity-50'
+                                            }`}
+                                        >
+                                            Sevenths
+                                        </button>
+                                    </div>
+
+                                    <PrimaryChords
+                                        selectedKey={selectedKey(activeKey, activeKeyType)}
+                                        onClick={(c) => handleChordSelect(c)}
+                                        activeChord={activeChord}
+                                    />
                                 </div>
                             </div>
 
                             <div>
-                                <h3 className="text-xs mb-2">without Sevenths</h3>
-                                <div className="flex p6 mb-6 space-x-8 ">
-                                    {selectedKey(activeKey, activeKeyType).chords.map((e: string) => (
-                                        <button
-                                            key={uuid()}
-                                            type="button"
-                                            name={removeSevenths(e)}
-                                            onClick={(c) => handleChordSelect(c)}
-                                            className={`flex justify-self-center items-center justify-center   rounded-md p-4 w-16 h-16 filter drop-shadow-md ${
-                                                removeSevenths(e) === activeChord
-                                                    ? 'bg-special-orange text-white'
-                                                    : 'bg-white text-special-grey'
-                                            }`}
-                                        >
-                                            {removeSevenths(e)}
-                                        </button>
-                                    ))}
+                                <div className="flex mb-6 space-x-8">
+                                    <h3 className="text-xs mb-2 w-36">Secondary Dominants</h3>
+                                    <div className="flex flex-col">
+                                        <div className="flex flex-row space-x-8 mb-10">
+                                            <SecondaryDominants
+                                                selectedKey={selectedKey(activeKey, activeKeyType)}
+                                                onClick={(c) => handleChordSelect(c)}
+                                                activeChord={activeChord}
+                                            />
+                                        </div>
+                                        <div className="flex flex-row space-x-8 mb-9">
+                                            <SecondaryDominantsGrade
+                                                selectedKey={selectedKey(activeKey, activeKeyType)}
+                                            />
+                                        </div>
+                                        <div className="flex flex-col bg-white p-5 filter drop-shadow-md">
+                                            <ChordChart chordName={activeChord} />
+                                            <ChordProgressions chord={activeKey} chordType={activeKeyType} />
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         <div className={`flex-col p6 mb-6 ${activeTab === 'scalesTab' ? 'flex' : 'hidden'}`}>
                             <h2>Scales</h2>
+                            {/* <Scales selectedMode={activeMode} /> */}
+
+                            <FretboardContainer root={activeKey} scale={activeKeyType} />
+                            <div className="flex p6 mb-6 space-x-8 ">
+                                <Modes
+                                    selectedKey={selectedKey(activeKey, activeKeyType)}
+                                    selectedMode={activeMode}
+                                    onClick={(c) => handleModeSelect(c)}
+                                />
+                            </div>
                         </div>
                         <div className={`flex-col p6 mb-6 ${activeTab === 'tracksTab' ? 'flex' : 'hidden'}`}>
                             <h2>Notable Tracks</h2>
                         </div>
                     </div>
-
-                    {/* <tbody>
-                            <tr>
-                                {selectedKey(activeKey, activeKeyType).scale.map((e: string) => (
-                                    <td key={uuid()}>{e}</td>
-                                ))}
-                            </tr>
-                        </tbody> */}
-
-                    {/* <table className="table-fixed w-full">
-                        <caption>Chords</caption>
-                        <tbody>
-                            <tr>
-                                
-                            </tr>
-                        </tbody>
-                    </table> */}
-                    {/* <table className="table-fixed w-full">
-                        <caption>Modes</caption>
-                        <tbody>
-                            <tr>
-                                {selectedKey(activeKey, activeKeyType).modes.map((e: string) => (
-                                    <td key={uuid()}>{e}</td>
-                                ))}
-                            </tr>
-                        </tbody>
-                    </table> */}
-                    {/* <table className="table-fixed w-full">
-                        <caption>Secondary Dominants</caption>
-                        <tbody>
-                            <tr>
-                                {selectedKey(activeKey, 'Major').secondaryDominants.map((e: string) => (
-                                    <td key={uuid()}>{e}</td>
-                                ))}
-                            </tr>
-                        </tbody>
-                    </table> */}
                 </div>
             </div>
         </div>
